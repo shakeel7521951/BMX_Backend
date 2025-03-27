@@ -26,5 +26,25 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+
+    - name: Create .env file
+      run: |
+        echo "PORT=${{ secrets.PORT }}" >> .env
+        echo "BASE_URL=${{ secrets.BASE_URL }}" >> .env
+        echo "FRONT_END_URL=${{ secrets.FRONT_END_URL }}" >> .env
+        echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
+        echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
+        echo "JwT_Secret=${{ secrets.JwT_Secret }}" >> .env
+        echo "JwT_Expire=${{ secrets.JwT_Expire }}" >> .env
+        echo "SEND_GRID_API_KEY=${{ secrets.SEND_GRID_API_KEY }}" >> .env
+        echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
+        echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+        echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+
+
+
+
+
+
     - run: npm ci
     - run: npm run build --if-present
