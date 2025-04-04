@@ -34,8 +34,8 @@ jobs:
         echo "FRONT_END_URL=${{ secrets.FRONT_END_URL }}" >> .env
         echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
         echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
-        echo "JwT_Secret=${{ secrets.JwT_Secret }}" >> .env
-        echo "JwT_Expire=${{ secrets.JwT_Expire }}" >> .env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+        echo "JWT_EXPIRE=${{ secrets.JWT_EXPIRE }}" >> .env
         echo "SEND_GRID_API_KEY=${{ secrets.SEND_GRID_API_KEY }}" >> .env
         echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
         echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env

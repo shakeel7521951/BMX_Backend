@@ -9,7 +9,7 @@ export const isUserLoggedin = async (req, res, next) => {
     return next(new Errorhandler('Please login to access this page.'));
   }
 
-  const Decode = jwt.verify(token, process.env.JwT_Secret);
+  const Decode = jwt.verify(token, process.env.JWT_SECRET);
 
   const user = await UserModel.findById(Decode.id);
 
