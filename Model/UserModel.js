@@ -220,7 +220,6 @@ UserSchema.methods.comparePassword = async function (password) {
 };
 
 UserSchema.methods.getJWTToken = function () {
-  console.log("JWT_SECRET........",process.env.JWT_SECRET);
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
