@@ -220,7 +220,8 @@ UserSchema.methods.comparePassword = async function (password) {
 };
 
 UserSchema.methods.getJWTToken = function () {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+  console.log("JWT_SECRET",JWT_SECRET);
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET || "7646543423utgffdhhttxsr", {
     expiresIn: process.env.JWT_EXPIRE,
   });
 };
