@@ -47,12 +47,14 @@ jobs:
       - name: Run Tests
         run: npm test --if-present
 
-      - name: Deploy to AWS Elastic Beanstalk
+      # Add a step to update AWS Secrets Manager
+      - name: Update AWS Secrets Manager
         run: |
-          eb init -p node.js -r us-west-2 --region us-west-2
-          eb use your-environment-name
-          eb deploy
-          
+          aws secretsmanager update-secret --secret-id JWT_SECRET --secret-string '{"JWT_SECRET":"${{ secrets.JWT_SECRET }}"}' --region us-west-2
+          aws secretsmanager update-secret --secret-id MONGODB_URL --secret-string '{"MONGODB_URL":"${{ secrets.MONGODB_URL }}"}' --region us-west-2
+          aws secretsmanager update-secret --secret-id SEND_GRID_API_KEY --secret-string '{"SEND_GRID_API_KEY":"${{ secrets.SEND_GRID_API_KEY }}"}' --region us-west-2
+          # Add any other secrets you'd like to update similarly
+
       - name: Show Runner Info
         run: |
           echo "Running on $(hostname)"
