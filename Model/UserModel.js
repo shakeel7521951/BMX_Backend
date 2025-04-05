@@ -219,5 +219,11 @@ UserSchema.methods.comparePassword = async function (password) {
   return await bcryptjs.compare(password, this.password);
 };
 
+UserSchema.methods.getJWTToken = function () {
+  console.log("JWT_SECRET at user model",process.env.JWT_SECRET);
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
 
 export default mongoose.model("User", UserSchema);
