@@ -47,7 +47,14 @@ jobs:
       - name: Run Tests
         run: npm test --if-present
 
-      # Add a step to update AWS Secrets Manager
+      # Step 1: Install AWS CLI
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      # Step 2: Update AWS Secrets Manager
       - name: Update AWS Secrets Manager
         run: |
           aws secretsmanager update-secret --secret-id JWT_SECRET --secret-string '{"JWT_SECRET":"${{ secrets.JWT_SECRET }}"}' --region us-west-2
