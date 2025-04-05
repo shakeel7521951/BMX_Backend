@@ -15,18 +15,15 @@ jobs:
         node-version: [20.x]
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js and cache dependencies
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      # Step 3: Create .env file from GitHub Secrets
       - name: Create .env file
         run: |
           echo "PORT=${{ secrets.PORT }}" >> .env
@@ -41,19 +38,21 @@ jobs:
           echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
           echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
 
-      # Step 4: Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # Step 5: Build the project
       - name: Build the project
         run: npm run build --if-present
 
-      # Step 6: Run Tests (safe even if no tests exist)
       - name: Run Tests
         run: npm test --if-present
 
-      # Optional: Show runner info
+      - name: Deploy to AWS Elastic Beanstalk
+        run: |
+          eb init -p node.js -r us-west-2 --region us-west-2
+          eb use your-environment-name
+          eb deploy
+          
       - name: Show Runner Info
         run: |
           echo "Running on $(hostname)"
