@@ -273,6 +273,8 @@ export const Login = catchAsyncError(async (req, res, next) => {
     );
   }
 
+  console.log("login .....",token);
+
   // Generate token for verified users
   const token = user.getJWTToken();
   res
