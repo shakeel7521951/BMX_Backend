@@ -99,10 +99,10 @@ export const verifyUser = catchAsyncError(async (req, res, next) => {
   const token = user.getJWTToken();
 
   res.cookie("token", token, {
+    expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), 
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 60 * 60 * 1000,
+    secure: true, 
+    sameSite: "None",
   });
 
   res.status(200).json({ message: "User verified successfully", user });
@@ -280,8 +280,10 @@ export const Login = catchAsyncError(async (req, res, next) => {
   res
     .status(200)
     .cookie("token", token, {
-      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), 
       httpOnly: true,
+      secure: true, 
+      sameSite: "None",
     })
     .json({
       success: true,
