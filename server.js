@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import connectD from "./ConnectDb/ConnectDB.js";
 import Userroute from "./Route/UserRoute.js";
 import TaskRoute from "./Route/TaskRoute.js";
-import withdrawRoute from './Route/Withdraw.js';
+import withdrawRoute from "./Route/Withdraw.js";
 import Error from "./MiddleWare/Error.js";
 
 process.on("uncaughtException", (err) => {
@@ -19,16 +19,27 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 app.use(express.json());
 
+const allowedOrigins = [
+  "https://www.bmxadventure.com",
+  "https://bmxadventure.com",
+];
+
 app.use(
   cors({
-    origin: process.env.FRONT_END_URL || "https://www.bmxadventure.com",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
 
-app.get('/',(req,res)=>{
-  res.send("Backend is running.......")
-})
+app.get("/", (req, res) => {
+  res.send("Backend is running.......");
+});
 
 app.use(cookieParser());
 
