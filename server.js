@@ -20,15 +20,15 @@ const PORT = process.env.PORT || 8000;
 app.use(express.json());
 
 const allowedOrigins = [
-  "https://www.bmxadventure.com",
   "https://bmxadventure.com",
+  "https://www.bmxadventure.com",
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
+        callback(null, origin);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
