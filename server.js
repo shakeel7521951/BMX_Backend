@@ -23,13 +23,13 @@ app.use(express.json());
 const allowedOrigins = [
   "https://bmxadventure.com",
   "https://www.bmxadventure.com",
+  "http://localhost:5174"
 ];
 
 // CORS setup
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log("Incoming origin:", origin);  // Log incoming origins for debugging
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, origin);
       } else {
