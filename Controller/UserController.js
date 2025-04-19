@@ -41,7 +41,7 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   });
 
   // Generate OTP
-  const otp = await user.generateOTP();
+  // const otp = await user.generateOTP();
   const subject = "Verify Your Email - BMX Adventure";
   const text = generateEmailTemplate(name, otp);
 
