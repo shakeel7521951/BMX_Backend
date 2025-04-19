@@ -46,7 +46,7 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   const text = generateEmailTemplate(name, otp);
 
   // Send verification email
-  await SendMail(email, subject, text);
+  // await SendMail(email, subject, text);
 
   res.status(200).json({
     success: true,
