@@ -8,52 +8,64 @@ import mongoose from "mongoose";
 export const Signup = catchAsyncError(async (req, res, next) => {
   const { name, email, phone, password, referralCode } = req.body;
 
-  let referredByUser = null;
+  // Step 1: Input validation
+  if (!name || !email || !phone || !password) {
+    return next(new Errorhandler("All fields are required", 400));
+  }
 
-  // Check if user already exists
+  if (password.length < 8) {
+    return next(new Errorhandler("Password must be at least 8 characters", 400));
+  }
+
+  // Step 2: Check if user already exists
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) {
     return next(new Errorhandler("Email already registered!", 400));
   }
 
-  // Handle referral code validation
+  // Step 3: Handle referral code (if provided)
+  let referredByUser = null;
   if (referralCode) {
-    const [username, , userId] = referralCode.split("/");
-    if (!username || !userId) {
+    const parts = referralCode.split("/");
+    if (parts.length < 3) {
       return next(new Errorhandler("Invalid referral code format", 400));
     }
 
     referredByUser = await UserModel.findOne({ referralLink: referralCode });
-
     if (!referredByUser) {
       return next(new Errorhandler("Invalid referral code", 400));
     }
   }
 
-  // Create new user (status: "pending")
+  // Step 4: Create new user
   const user = await UserModel.create({
     name,
     email,
-    password,
     phone,
+    password,
     referredBy: referredByUser ? referredByUser._id : null,
     status: "pending",
   });
 
-  // Generate OTP
-  const otp = await user.generateOTP();
-  const subject = "Verify Your Email - BMX Adventure";
-  const text = generateEmailTemplate(name, otp);
+  // Step 5: Generate OTP & send email
+  try {
+    const otp = await user.generateOTP(); // assumed method on the model
+    const subject = "Verify Your Email - BMX Adventure";
+    const text = generateEmailTemplate(name, otp);
 
-  // Send verification email
-  await SendMail(email, subject, text);
+    await SendMail(email, subject, text); // assumed email utility
+  } catch (err) {
+    return next(new Errorhandler("Failed to send verification email. Please try again.", 500));
+  }
 
+  // Step 6: Return response
   res.status(200).json({
     success: true,
     message: "OTP sent to email. Verify your account.",
     user,
   });
 });
+
 // Utility function for email template
 const generateEmailTemplate = (name, otp) => `
   <p>Hello <strong>${name}</strong>,</p>
