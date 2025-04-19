@@ -17,18 +17,18 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   }
 
   // Handle referral code validation
-  if (referralCode) {
-    const [username, , userId] = referralCode.split("/");
-    if (!username || !userId) {
-      return next(new Errorhandler("Invalid referral code format", 400));
-    }
+  // if (referralCode) {
+  //   const [username, , userId] = referralCode.split("/");
+  //   if (!username || !userId) {
+  //     return next(new Errorhandler("Invalid referral code format", 400));
+  //   }
 
-    referredByUser = await UserModel.findOne({ referralLink: referralCode });
+  //   referredByUser = await UserModel.findOne({ referralLink: referralCode });
 
-    if (!referredByUser) {
-      return next(new Errorhandler("Invalid referral code", 400));
-    }
-  }
+  //   if (!referredByUser) {
+  //     return next(new Errorhandler("Invalid referral code", 400));
+  //   }
+  // }
 
   // Create new user (status: "pending")
   const user = await UserModel.create({
