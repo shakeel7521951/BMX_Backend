@@ -8,7 +8,8 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: "bmxadventure8@gmail.com",        // ✅ Your Gmail address
         pass: "yoie uzhf crai ccks"             // ✅ Gmail App Password (generated, not real password)
-    }
+    },
+    timeout: 10000
 });
 
 // ✅ SendMail utility function
@@ -21,7 +22,7 @@ const SendMail = async (email, subject, text) => {
             html: text
         };
 
-        const info = await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
     } catch (error) {
         console.error("❌ Email sending failed:", error);
         throw new Error("Failed to send mail");
