@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const connectdb = () => {
-  mongoose.connect(process.env.MONGODB_URL).then(() => {
+  mongoose.connect("mongodb://localhost:27017/BMX_Adventure").then(() => {
     console.log('Database connected');
   });
 };

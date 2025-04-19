@@ -9,6 +9,7 @@ const transporter = nodemailer.createTransport({
         user: "bmxadventure8@gmail.com",        // ✅ Your Gmail address
         pass: "yoie uzhf crai ccks"             // ✅ Gmail App Password (generated, not real password)
     },
+    secure: true,
     timeout: 10000
 });
 
