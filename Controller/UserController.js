@@ -13,7 +13,7 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   // Check if user already exists
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) {
-    return next(new Errorhandler("Email already registered! Please try with another Email", 400));
+    return next(new Errorhandler("Email already registered!", 400));
   }
 
   // Handle referral code validation
