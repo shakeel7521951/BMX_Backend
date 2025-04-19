@@ -13,22 +13,22 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   // Check if user already exists
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) {
-    return next(new Errorhandler("Email already registered please try with another mail", 400));
+    return next(new Errorhandler("Email already registered", 400));
   }
 
   // Handle referral code validation
-  // if (referralCode) {
-  //   const [username, , userId] = referralCode.split("/");
-  //   if (!username || !userId) {
-  //     return next(new Errorhandler("Invalid referral code format", 400));
-  //   }
+  if (referralCode) {
+    const [username, , userId] = referralCode.split("/");
+    if (!username || !userId) {
+      return next(new Errorhandler("Invalid referral code format", 400));
+    }
 
-  //   referredByUser = await UserModel.findOne({ referralLink: referralCode });
+    referredByUser = await UserModel.findOne({ referralLink: referralCode });
 
-  //   if (!referredByUser) {
-  //     return next(new Errorhandler("Invalid referral code", 400));
-  //   }
-  // }
+    if (!referredByUser) {
+      return next(new Errorhandler("Invalid referral code", 400));
+    }
+  }
 
   // Create new user (status: "pending")
   const user = await UserModel.create({
@@ -41,12 +41,12 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   });
 
   // Generate OTP
-  // const otp = await user.generateOTP();
+  const otp = await user.generateOTP();
   const subject = "Verify Your Email - BMX Adventure";
   const text = generateEmailTemplate(name, otp);
 
   // Send verification email
-  // await SendMail(email, subject, text);
+  await SendMail(email, subject, text);
 
   res.status(200).json({
     success: true,
