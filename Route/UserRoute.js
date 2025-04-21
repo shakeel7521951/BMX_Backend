@@ -4,6 +4,7 @@ import {
   convertPoints,
   convertReferredPoints,
   DailyClaim,
+  deleteUser,
   forgotPasswordOTP,
   getallusers,
   getReferredUserData,
@@ -46,5 +47,6 @@ Router.put("/reset-password",resetPassword);
 Router.put("/upload-payment-image",isUserLoggedin,upload.single('paymentImage'),uploadPaymentImage);
 Router.put("/update-eligibility-criteria/:userId",isUserLoggedin,updateEligibilityCriteria);
 Router.put("/update-user-role/:userId",isUserLoggedin,updateUserRole);
+Router.delete("/delete-user/:userId",isUserLoggedin,deleteUser);
 
 export default Router;

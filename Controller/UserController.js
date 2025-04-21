@@ -14,7 +14,9 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   }
 
   if (password.length < 8) {
-    return next(new Errorhandler("Password must be at least 8 characters", 400));
+    return next(
+      new Errorhandler("Password must be at least 8 characters", 400)
+    );
   }
 
   // Step 2: Check if user already exists
@@ -55,7 +57,12 @@ export const Signup = catchAsyncError(async (req, res, next) => {
 
     await SendMail(email, subject, text); // assumed email utility
   } catch (err) {
-    return next(new Errorhandler("Failed to send verification email. Please try again.", 500));
+    return next(
+      new Errorhandler(
+        "Failed to send verification email. Please try again.",
+        500
+      )
+    );
   }
 
   // Step 6: Return response
@@ -111,9 +118,9 @@ export const verifyUser = catchAsyncError(async (req, res, next) => {
   const token = user.getJWTToken();
 
   res.cookie("token", token, {
-    expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), 
+    expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
     httpOnly: true,
-    secure: true, 
+    secure: true,
     sameSite: "None",
   });
 
@@ -285,15 +292,14 @@ export const Login = catchAsyncError(async (req, res, next) => {
     );
   }
 
-  
   // Generate token for verified users
   const token = user.getJWTToken();
   res
     .status(200)
     .cookie("token", token, {
-      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), 
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      secure: true, 
+      secure: true,
       sameSite: "None",
     })
     .json({
@@ -586,7 +592,7 @@ export const convertReferredPoints = catchAsyncError(async (req, res, next) => {
   }
 });
 
-export const uploadPaymentImage = catchAsyncError(async (req, res, next) => {  
+export const uploadPaymentImage = catchAsyncError(async (req, res, next) => {
   const userData = req.user;
   if (!userData) {
     return next(new Errorhandler("Please login first", 401));
@@ -663,7 +669,6 @@ export const updateEligibilityCriteria = catchAsyncError(
       Best regards,\n
       BMX Adventure Team`;
 
-
       await SendMail(user.email, subject, text);
 
       user.eligible = status;
@@ -696,4 +701,23 @@ export const updateUserRole = catchAsyncError(async (req, res, next) => {
   await user.save();
 
   res.status(200).json({ message: "User Verified successfully", user });
+});
+
+export const deleteUser = catchAsyncError(async (req, res, next) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return next(new Errorhandler("User ID is required!", 400));
+  }
+
+  const user = await UserModel.findByIdAndDelete(userId);
+
+  if (!user) {
+    return next(new Errorhandler("Error in deleting user!", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "User deleted successfully",
+  });
 });
