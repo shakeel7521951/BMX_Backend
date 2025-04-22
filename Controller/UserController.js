@@ -139,7 +139,6 @@ export const forgotPasswordOTP = catchAsyncError(async (req, res, next) => {
   }
 
   const otp = await user.generateOTP();
-  console.log("otp is .....", otp);
 
   const name = user.name;
   const subject = "OTP for Password Reset";
