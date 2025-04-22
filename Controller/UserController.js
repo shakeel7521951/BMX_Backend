@@ -660,14 +660,14 @@ export const updateEligibilityCriteria = catchAsyncError(
       }
 
       const subject = "Update on Your Eligibility Status";
-      const text = `Dear ${user.name}\n\n,
+      const text = `<p>Dear <strong>${user.name}</strong></p>
 
-      We are reaching out to inform you that your eligibility status has been updated to: ${status}.\n
+      <p>We are reaching out to inform you that your eligibility status has been updated to:<strong> ${status}<strong/></p>
 
-      If you have any questions or need further assistance, please feel free to contact our support team.\n\n
+      <p>If you have any questions or need further assistance, please feel free to contact our support team.</p>\n\n
 
-      Best regards,\n
-      BMX Adventure Team`;
+      <p>Best regards,</p>\n
+      BMX Adventure Team</p>`;
 
       await SendMail(user.email, subject, text);
 
