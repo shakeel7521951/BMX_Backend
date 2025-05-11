@@ -25,7 +25,6 @@ export const Signup = catchAsyncError(async (req, res, next) => {
     return next(new Errorhandler("Email already registered!", 400));
   }
 
-  // Step 3: Handle referral code (if provided)
   let referredByUser = null;
   if (referralCode) {
     const parts = referralCode.split("/");
@@ -49,13 +48,31 @@ export const Signup = catchAsyncError(async (req, res, next) => {
     status: "pending",
   });
 
-  // Step 5: Generate OTP & send email
+  // Step 5: Update referrer's details if referral exists
+  if (referredByUser) {
+    referredByUser.referredPoints.push({
+      userId: user._id,
+      points: 0, // You can set initial points here if needed
+      userDetails: {
+        name: user.name,
+        email: user.email,
+        UserLevel: user.UserLevel,
+        totalPointsEarned: user.totalPointsEarned,
+        referralLink: user.referralLink,
+      },
+    });
+
+    // Save the referrer to trigger the level update middleware
+    await referredByUser.save();
+  }
+
+  // Step 6: Generate OTP & send email
   try {
-    const otp = await user.generateOTP(); // assumed method on the model
+    const otp = await user.generateOTP();
     const subject = "Verify Your Email - BMX Adventure";
     const text = generateEmailTemplate(name, otp);
 
-    await SendMail(email, subject, text); // assumed email utility
+    await SendMail(email, subject, text);
   } catch (err) {
     return next(
       new Errorhandler(
@@ -65,7 +82,7 @@ export const Signup = catchAsyncError(async (req, res, next) => {
     );
   }
 
-  // Step 6: Return response
+  // Step 7: Return response
   res.status(200).json({
     success: true,
     message: "OTP sent to email. Verify your account.",
@@ -104,15 +121,15 @@ export const verifyUser = catchAsyncError(async (req, res, next) => {
   user.status = "verified";
   await user.save();
 
-  // Assign referral points ONLY after verification
-  if (user.referredBy) {
-    const referredByUser = await UserModel.findById(user.referredBy);
-    if (referredByUser) {
-      referredByUser.referredPoints = referredByUser.referredPoints || [];
-      referredByUser.referredPoints.push({ userId: user._id, points: 1000 });
-      await referredByUser.save();
-    }
-  }
+  // // Assign referral points ONLY after verification
+  // if (user.referredBy) {
+  //   const referredByUser = await UserModel.findById(user.referredBy);
+  //   if (referredByUser) {
+  //     referredByUser.referredPoints = referredByUser.referredPoints || [];
+  //     referredByUser.referredPoints.push({ userId: user._id, points: 1000 });
+  //     await referredByUser.save();
+  //   }
+  // }
 
   // Generate JWT token
   const token = user.getJWTToken();
@@ -644,41 +661,72 @@ export const updateEligibilityCriteria = catchAsyncError(
       const { status } = req.body;
       const { userId } = req.params;
 
-      if (!status) {
-        return next(new Errorhandler("Status is required", 403));
-      }
-
+      // Validation
+      if (!status) return next(new Errorhandler("Status is required", 403));
       if (!mongoose.Types.ObjectId.isValid(userId)) {
         return next(new Errorhandler("Invalid user ID format", 400));
       }
 
       const user = await UserModel.findById(userId);
+      if (!user) return next(new Errorhandler("User not found", 404));
 
-      if (!user) {
-        return next(new Errorhandler("User not found", 404));
-      }
+      // Send email notification
+      await SendMail(
+        user.email,
+        "Update on Your Eligibility Status",
+        `<p>Dear <strong>${user.name}</strong></p>
+        <p>Your eligibility status has been updated to: <strong>${status}</strong></p>
+        <p>Contact support for any questions.</p>
+        <p>Best regards,<br/>BMX Adventure Team</p>`
+      );
 
-      const subject = "Update on Your Eligibility Status";
-      const text = `<p>Dear <strong>${user.name}</strong></p>
-
-      <p>We are reaching out to inform you that your eligibility status has been updated to:<strong> ${status}<strong/></p>
-
-      <p>If you have any questions or need further assistance, please feel free to contact our support team.</p>\n\n
-
-      <p>Best regards,</p>\n
-      BMX Adventure Team</p>`;
-
-      await SendMail(user.email, subject, text);
-
+      // Update user status
       user.eligible = status;
       await user.save();
 
-      res.status(200).json({ message: "User Verified successfully", user });
+      // Process referral if applicable
+      if (status === "verified" && user.referredBy) {
+        const referrer = await UserModel.findById(user.referredBy);
+
+        if (referrer?.eligible === "verified") {
+          // Level-based points mapping
+          const POINTS_BY_LEVEL = {
+            1: 1000,
+            2: 1400,
+            3: 2000,
+            4: 2500,
+          };
+
+          const pointsToAdd = POINTS_BY_LEVEL[referrer.UserLevel] || 1000;
+
+          // Add referral with points
+          referrer.referredPoints.push({
+            userId: user._id,
+            points: pointsToAdd,
+            userDetails: {
+              name: user.name,
+              email: user.email,
+              UserLevel: user.UserLevel,
+              totalPointsEarned: user.totalPointsEarned,
+              referralLink: user.referralLink,
+            },
+          });
+
+          // Update referrer's total points
+          referrer.totalPointsEarned =
+            (referrer.totalPointsEarned || 0) + pointsToAdd;
+          await referrer.save();
+        }
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "User status updated successfully",
+        user,
+      });
     } catch (error) {
-      console.error("Error in updateEligibilityCriteria:", error);
-      res
-        .status(500)
-        .json({ message: "Internal Server Error", error: error.message });
+      console.error("Update eligibility error:", error);
+      return next(new Errorhandler("Internal Server Error", 500));
     }
   }
 );

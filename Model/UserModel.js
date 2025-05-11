@@ -21,9 +21,9 @@ const UserSchema = new mongoose.Schema({
     minlength: [8, "Password must be at least 8 characters"],
     select: false,
   },
-  phone:{
-    type:Number,
-    required:true
+  phone: {
+    type: Number,
+    required: true,
   },
   status: {
     type: String,
@@ -39,12 +39,12 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "unverified",
   },
-  userRole:{
-    type:String,
-    default:"User"
+  userRole: {
+    type: String,
+    default: "User",
   },
-  paymentImage:{
-    type:String,
+  paymentImage: {
+    type: String,
   },
   cardDetails: {
     cardNumber1: {
@@ -131,7 +131,6 @@ UserSchema.methods.generateOTP = async function () {
   return otp;
 };
 
-
 UserSchema.methods.verifyOTP = function (enteredOTP) {
   if (this.otp !== enteredOTP || Date.now() > this.otpExpires) return false;
   return true;
@@ -144,34 +143,40 @@ UserSchema.pre("save", function (next) {
   next();
 });
 
-UserSchema.pre("save", async function () {
+UserSchema.pre("save", async function (next) {
   if (this.isModified("totalPointsEarned") || this.isNew) {
     this.UserLevel = Math.min(
       100,
       Math.floor(this.totalPointsEarned / 5000) + 1
     );
   }
+  next();
 });
 
-UserSchema.pre("save", async function () {
+UserSchema.pre("save", async function (next) {
   if (!this.referralLink) {
     const sanitizedUsername = this.name.toLowerCase().replace(/\s+/g, "-");
     this.referralLink = `${sanitizedUsername}/referral/${this._id}`;
   }
+  next();
 });
 
 UserSchema.pre("save", function (next) {
-  if (this.isModified("referrals")) {
-    const referralCount = this.referrals.length;
+  if (this.isModified("referredPoints")) {
+    const referralCount = this.referredPoints?.length || 0;
+    let newLevel = this.UserLevel || 1; // Keep current level as default
 
     if (referralCount >= 20) {
-      this.UserLevel = 4;
+      newLevel = 4;
     } else if (referralCount >= 10) {
-      this.UserLevel = 3;
+      newLevel = 3;
     } else if (referralCount >= 3) {
-      this.UserLevel = 2;
-    } else {
-      this.UserLevel = 1;
+      newLevel = 2;
+    }
+
+    // Only update if the new level is higher than current
+    if (newLevel > this.UserLevel) {
+      this.UserLevel = newLevel;
     }
   }
   next();
@@ -197,7 +202,7 @@ const generateUniqueNumber = async (length, field, model) => {
   return randomNumber;
 };
 
-UserSchema.pre("save", async function () {
+UserSchema.pre("save", async function (next) {
   if (this.isNew) {
     const User = this.constructor;
 
@@ -207,12 +212,14 @@ UserSchema.pre("save", async function () {
       cardNumber3: await generateUniqueNumber(2, "cardNumber3", User),
     };
   }
+  next();
 });
 
-UserSchema.pre("save", async function () {
+UserSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await bcryptjs.hash(this.password, 10);
   }
+  next();
 });
 
 UserSchema.methods.comparePassword = async function (password) {
