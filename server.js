@@ -32,14 +32,15 @@ app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, origin);
+        callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // Allow cookies to be sent with requests
+    credentials: true,
   })
 );
+
 
 // Root route to check if the backend is running
 app.get("/", (req, res) => {
