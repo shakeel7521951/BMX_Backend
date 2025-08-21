@@ -23,6 +23,7 @@ app.use(express.json());
 const allowedOrigins = [
   "https://bmxadventure.com",
   "https://www.bmxadventure.com",
+  "https://bmx-atventure.vercel.app",
   "http://localhost:5174"
 ];
 
